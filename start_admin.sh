@@ -1,1 +1,1 @@
-kubeadm init --kubernetes-version 'v1.23.4'
+kubeadm init --kubernetes-version 'v1.23.4' --pod-network-cidr=10.244.0.0/16
