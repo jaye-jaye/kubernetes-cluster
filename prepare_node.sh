@@ -1,13 +1,25 @@
 #!/bin/bash
-set -e
 
 # install docker
-# yum install -y docker-ce-19.03.15-3.el7 containerd.io-1.3.7-3.1.el7
+yum list installed docker-ce | grep -s '19.03.15-3.el7'
+dokcer_ret=$?
+yum list installed containerd.io | grep -s '1.3.7-3.1.el7'
+containerd_ret=$?
+if [[ $dokcer_ret -ne 0 || $containerd_ret -ne 0 ]]; then
+    echo "you should install docker-ce and containerd.io of specify version"
+    echo "run [yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo]"
+    echo "and run[yum erase -y containerd.io && yum install -y containerd.io-1.3.7-3.1.el7 && yum install -y docker-ce-19.03.15-3.el7]"
+    exit -1
+fi
+
+set -e
 
 # stop firewall, SELINUX and swap
 systemctl stop firewalld
 systemctl disable firewalld
-set +e && setenforce 0 && set -e
+set +e
+setenforce 0
+set -e
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 swapoff -a
 sed -i 's/.*swap.*/#&/' /etc/fstab
@@ -26,7 +38,7 @@ EOF
 yum install kubelet-1.23.4 kubeadm-1.23.4 kubectl-1.23.4 -y
 
 # bridged traffic config
-cat << EOF > /ets/modules-load.d/k8s.conf
+cat << EOF > /etc/modules-load.d/k8s.conf
 br_netfilter
 EOF
 
