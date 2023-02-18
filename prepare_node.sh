@@ -4,7 +4,7 @@ set -e
 # stop firewall, SELINUX and swap
 systemctl stop firewalld
 systemctl disable firewalld
-setenforce 0
+set +e && setenforce 0 && set -e
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 swapoff -a
 sed -i 's/.*swap.*/#&/' /etc/fstab
@@ -35,9 +35,13 @@ EOF
 sysctl --system
 
 # check docker cgroup config
-cgroup_type=`docker info | grep 'Cgroup Driver' | asw '{print $3}'`
+cgroup_type=`docker info | grep 'Cgroup Driver' | awk '{print $3}'`
 if [[ $cgroup_type != "systemd" ]]; then
     echo "Cgroup Driver muste be set to systemd!"
+    echo "you can set cgroup driver to systemd in /etc/docker/daemon.json and restart dockerd"
+    # {
+    #     "exec-opts": ["native.cgroupdriver=systemd"]
+    # }
     exit -1
 fi
 
