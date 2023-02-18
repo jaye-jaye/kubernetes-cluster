@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# install docker
+# yum install -y docker-ce-19.03.15-3.el7 containerd.io-1.3.7-3.1.el7
+
 # stop firewall, SELINUX and swap
 systemctl stop firewalld
 systemctl disable firewalld
